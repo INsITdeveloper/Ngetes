@@ -3,16 +3,49 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --background: #0f172a;
+  --card-background: rgba(30, 41, 59, 0.5);
+  --text-primary: #fff;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(148, 163, 184, 0.1);
 }
 
 body {
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgb(var(--background-end-rgb))
-  )
-  rgb(var(--background-start-rgb));
+  background-color: var(--background);
+  color: var(--text-primary);
+}
+
+.card {
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(10px);
+}
+
+.api-method {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.api-method.get {
+  background: #22c55e;
+  color: #fff;
+}
+
+.api-method.post {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.search-input {
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.sidebar {
+  background: rgba(30, 41, 59, 0.3);
+  border-right: 1px solid var(--border-color);
 }
