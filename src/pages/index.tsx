@@ -24,7 +24,6 @@ export default function Home() {
   const [apiResponse, setApiResponse] = useState<any>(null);
   const [curlCommand, setCurlCommand] = useState('');
 
-  // Fungsi untuk memperbarui statistik
   useEffect(() => {
     const interval = setInterval(() => {
       setStats((prevStats) =>
@@ -35,36 +34,37 @@ export default function Home() {
           if (stat.label === 'Total Visitors' && typeof stat.value === 'number') {
             return { ...stat, value: stat.value + Math.floor(Math.random() * 10) };
           }
-          return stat; // Kembalikan stat tanpa perubahan jika tidak memenuhi kondisi
+          return stat;
         })
       );
-    }, 2000); // Update setiap 2 detik
+    }, 2000);
 
-    return () => clearInterval(interval); // Membersihkan interval saat komponen di-unmount
+    return () => clearInterval(interval);
   }, []);
 
-  // Fungsi untuk menangani klik pada endpoint
   const handleEndpointClick = (path: string) => {
-    setInputPrompt(''); // Reset input prompt
-    setApiResponse(null); // Reset API response
-    setCurlCommand(''); // Reset cURL command
+    setInputPrompt('');
+    setApiResponse(null);
+    setCurlCommand('');
   };
 
-  // Fungsi untuk memanggil API
   const handleExecute = async () => {
     setIsLoading(true);
     setApiResponse(null);
     setCurlCommand('');
 
+    // Gunakan VERCEL_URL jika tersedia, jika tidak, gunakan localhost
+    const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+
     try {
-      const response = await fetch(`/api/textoins?prompt=${encodeURIComponent(inputPrompt)}`);
+      const response = await fetch(`${vercelUrl}/api/textoins?prompt=${encodeURIComponent(inputPrompt)}`);
       const data = await response.json();
 
       if (response.ok) {
         setApiResponse(data);
-        // Generate cURL command
+        // Generate cURL command dengan URL yang sesuai
         setCurlCommand(
-          `curl -X GET "http://localhost:3000/api/textoins?prompt=${encodeURIComponent(inputPrompt)}"`
+          `curl -X GET "${vercelUrl}/api/textoins?prompt=${encodeURIComponent(inputPrompt)}"`
         );
       } else {
         setApiResponse({ error: data.error || 'Failed to fetch data' });
@@ -80,7 +80,6 @@ export default function Home() {
     <ChakraProvider>
       <Container maxW="container.xl" p={0}>
         <Flex>
-          {/* Sidebar */}
           <Box className="sidebar" w="250px" h="100vh" p={4}>
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -121,7 +120,7 @@ export default function Home() {
                       cursor="pointer"
                       _hover={{ bg: 'rgba(255,255,255,0.1)' }}
                       borderRadius="md"
-                      onClick={() => handleEndpointClick(endpoint.path)} // Tambahkan ini
+                      onClick={() => handleEndpointClick(endpoint.path)}
                     >
                       <span className={`api-method ${endpoint.method.toLowerCase()}`}>
                         {endpoint.method}
@@ -134,7 +133,6 @@ export default function Home() {
             </motion.div>
           </Box>
 
-          {/* Main Content */}
           <Box flex={1} p={8}>
             <Grid templateColumns="repeat(2, 1fr)" gap={6} mb={8}>
               {stats.map((stat, index) => (
@@ -152,7 +150,7 @@ export default function Home() {
                         </Text>
                         <Text fontSize="2xl" fontWeight="bold">
                           {typeof stat.value === 'number'
-                            ? stat.value.toLocaleString() // Format angka dengan separator
+                            ? stat.value.toLocaleString()
                             : stat.value}
                         </Text>
                       </Box>
@@ -163,7 +161,6 @@ export default function Home() {
               ))}
             </Grid>
 
-            {/* API Documentation Area */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -171,14 +168,12 @@ export default function Home() {
             >
               <Box className="card" p={8} minH="400px">
                 <Flex direction="column" gap={4}>
-                  {/* Input Prompt */}
                   <Input
                     placeholder="Enter a prompt (e.g., A young man wearing a cool black hoodie in a cyberpunk style)"
                     value={inputPrompt}
                     onChange={(e) => setInputPrompt(e.target.value)}
                   />
 
-                  {/* Execute Button */}
                   <Button
                     onClick={handleExecute}
                     colorScheme="blue"
@@ -188,7 +183,6 @@ export default function Home() {
                     Execute
                   </Button>
 
-                  {/* cURL Command */}
                   {curlCommand && (
                     <Box bg="gray.100" p={4} borderRadius="md">
                       <Text fontSize="sm" fontWeight="bold" mb={2}>
@@ -200,7 +194,6 @@ export default function Home() {
                     </Box>
                   )}
 
-                  {/* API Response */}
                   {apiResponse && (
                     <Box bg="gray.100" p={4} borderRadius="md">
                       <Text fontSize="sm" fontWeight="bold" mb={2}>
