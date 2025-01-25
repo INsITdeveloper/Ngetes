@@ -58,6 +58,8 @@ const swaggerConfig = {
   },
 };
 
+const MotionBox = motion(Box);
+
 export default function Home() {
   return (
     <ChakraProvider>
@@ -74,25 +76,24 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
           >
             <Text fontSize="lg" mb={8} textAlign="center">
               Explore our API endpoints with interactive documentation
             </Text>
           </motion.div>
 
-          <Box
+          <MotionBox
             bg="white"
             p={6}
             borderRadius="lg"
             boxShadow="xl"
-            as={motion.div}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.5, ease: 'easeInOut' }} // Perbaikan di sini
+            transition={{ duration: 0.5, delay: 0.5 }}
           >
             <SwaggerUI spec={swaggerConfig} />
-          </Box>
+          </MotionBox>
         </motion.div>
       </Container>
     </ChakraProvider>
