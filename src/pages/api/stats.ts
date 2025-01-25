@@ -6,4 +6,4 @@ export default function handler(
   res: NextApiResponse
 ) {
   const stats = StatsManager.getInstance();
-  res.status(200).json(stats.g
+  res.status(200).json(stats.getStats
