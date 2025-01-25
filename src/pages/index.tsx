@@ -1,100 +1,125 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import dynamic from 'next/dynamic';
-import { ChakraProvider, Box, Container, Heading, Text } from '@chakra-ui/react';
+import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid } from '@chakra-ui/react';
+import { FiSearch, FiEye, FiClock, FiBox, FiActivity } from 'react-icons/fi';
 
-const SwaggerUI = dynamic(() => import('swagger-ui-react'), { ssr: false });
-import 'swagger-ui-react/swagger-ui.css';
+const endpoints = [
+  { method: 'GET', name: 'Animagine', category: 'AI' },
+  { method: 'GET', name: 'Anipix', category: 'AI' },
+  { method: 'GET', name: 'Artify', category: 'AI' },
+  { method: 'POST', name: 'Chat GPT', category: 'AI' },
+  { method: 'GET', name: 'Claude', category: 'AI' },
+  { method: 'GET', name: 'Copilot', category: 'AI' },
+];
 
-const swaggerConfig = {
-  openapi: '3.0.0',
-  info: {
-    title: 'FFStalk API Documentation',
-    version: '1.0.0',
-    description: 'API documentation for FFStalk service',
-  },
-  servers: [
-    {
-      url: '/api',
-      description: 'API Server',
-    },
-  ],
-  paths: {
-    '/ffstalk': {
-      get: {
-        summary: 'Get FF user information',
-        parameters: [
-          {
-            name: 'id',
-            in: 'query',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-            description: 'FF user ID',
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'Successful response',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    status: {
-                      type: 'string',
-                    },
-                    data: {
-                      type: 'object',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-};
-
-const MotionBox = motion(Box);
+const stats = [
+  { label: 'Total Requests', value: '1,142,891', icon: FiActivity, color: 'blue.400' },
+  { label: 'Total Visitors', value: '5,173', icon: FiEye, color: 'green.400' },
+  { label: 'Total Endpoints', value: '170', icon: FiBox, color: 'yellow.400' },
+  { label: 'Runtime', value: '14 day, 7 hour', icon: FiClock, color: 'purple.400' },
+];
 
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState('');
+
   return (
     <ChakraProvider>
-      <Container maxW="container.xl" py={10}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Heading as="h1" size="2xl" mb={6} textAlign="center">
-            FFStalk API Documentation
-          </Heading>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-          >
-            <Text fontSize="lg" mb={8} textAlign="center">
-              Explore our API endpoints with interactive documentation
-            </Text>
-          </motion.div>
+      <Container maxW="container.xl" p={0}>
+        <Flex>
+          {/* Sidebar */}
+          <Box className="sidebar" w="250px" h="100vh" p={4}>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Text fontSize="2xl" fontWeight="bold" mb={6}>
+                API Documentation
+              </Text>
+              <Box position="relative" mb={6}>
+                <Input
+                  placeholder="Search endpoints..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-input"
+                  pl={10}
+                />
+                <Icon
+                  as={FiSearch}
+                  position="absolute"
+                  left={3}
+                  top={3}
+                  color="gray.400"
+                />
+              </Box>
+              <Box>
+                {endpoints.map((endpoint, index) => (
+                  <motion.div
+                    key={endpoint.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <Flex
+                      align="center"
+                      p={2}
+                      mb={2}
+                      cursor="pointer"
+                      _hover={{ bg: 'rgba(255,255,255,0.1)' }}
+                      borderRadius="md"
+                    >
+                      <span className={`api-method ${endpoint.method.toLowerCase()}`}>
+                        {endpoint.method}
+                      </span>
+                      <Text ml={3}>{endpoint.name}</Text>
+                    </Flex>
+                  </motion.div>
+                ))}
+              </Box>
+            </motion.div>
+          </Box>
 
-          <MotionBox
-            bg="white"
-            p={6}
-            borderRadius="lg"
-            boxShadow="xl"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <SwaggerUI spec={swaggerConfig} />
-          </MotionBox>
-        </motion.div>
+          {/* Main Content */}
+          <Box flex={1} p={8}>
+            <Grid templateColumns="repeat(2, 1fr)" gap={6} mb={8}>
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <Box className="card" p={6}>
+                    <Flex align="center" justify="space-between">
+                      <Box>
+                        <Text color="gray.400" fontSize="sm" mb={1}>
+                          {stat.label}
+                        </Text>
+                        <Text fontSize="2xl" fontWeight="bold">
+                          {stat.value}
+                        </Text>
+                      </Box>
+                      <Icon as={stat.icon} boxSize={6} color={stat.color} />
+                    </Flex>
+                  </Box>
+                </motion.div>
+              ))}
+            </Grid>
+
+            {/* API Documentation Area */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <Box className="card" p={8} minH="400px">
+                <Flex justify="center" align="center" h="100%">
+                  <Text color="gray.400">Select an endpoint to explore</Text>
+                </Flex>
+              </Box>
+            </motion.div>
+          </Box>
+        </Flex>
       </Container>
     </ChakraProvider>
   );
