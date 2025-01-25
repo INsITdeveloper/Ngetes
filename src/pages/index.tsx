@@ -82,17 +82,17 @@ export default function Home() {
           </motion.div>
 
           <Box
-            bg="white"
-            p={6}
-            borderRadius="lg"
-            boxShadow="xl"
-            as={motion.div}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5 }} // Update this line
-          >
-            <SwaggerUI spec={swaggerConfig} />
-          </Box>
+           bg="white"
+           p={6}
+          borderRadius="lg"
+          boxShadow="xl"
+          as={motion.div}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }} // Update this line
+        >
+        <SwaggerUI spec={swaggerConfig} />
+         </Box>
         </motion.div>
       </Container>
     </ChakraProvider>
