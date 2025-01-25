@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid } from '@chakra-ui/react';
+import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid, Button } from '@chakra-ui/react';
 import { FiSearch, FiEye, FiClock, FiBox, FiActivity } from 'react-icons/fi';
 
 const endpoints = [
-  { method: 'GET', name: 'Stats', category: 'Analytics', path: 'https://apins.vercel.app/api/stats' },
-  { method: 'GET', name: 'Textoins', category: 'Utilities', path: 'https://apins.vercel.app/api/textoins' },
-  { method: 'GET', name: 'FFStalk', category: 'Gaming', path: 'https://apins.vercel.app/api/ffstalk' },
+  { method: 'GET', name: 'Stats', category: 'Analytics', path: '/api/stats' },
+  { method: 'GET', name: 'Textoins', category: 'Utilities', path: '/api/textoins' },
+  { method: 'GET', name: 'FFStalk', category: 'Gaming', path: '/api/ffstalk' },
 ];
 
 const initialStats = [
@@ -19,6 +19,10 @@ const initialStats = [
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState(initialStats);
+  const [isLoading, setIsLoading] = useState(false);
+  const [inputPrompt, setInputPrompt] = useState('');
+  const [apiResponse, setApiResponse] = useState<any>(null);
+  const [curlCommand, setCurlCommand] = useState('');
 
   // Fungsi untuk memperbarui statistik
   useEffect(() => {
@@ -31,13 +35,46 @@ export default function Home() {
           if (stat.label === 'Total Visitors' && typeof stat.value === 'number') {
             return { ...stat, value: stat.value + Math.floor(Math.random() * 10) };
           }
-          return stat;
+          return stat; // Kembalikan stat tanpa perubahan jika tidak memenuhi kondisi
         })
       );
     }, 2000); // Update setiap 2 detik
 
     return () => clearInterval(interval); // Membersihkan interval saat komponen di-unmount
   }, []);
+
+  // Fungsi untuk menangani klik pada endpoint
+  const handleEndpointClick = (path: string) => {
+    setInputPrompt(''); // Reset input prompt
+    setApiResponse(null); // Reset API response
+    setCurlCommand(''); // Reset cURL command
+  };
+
+  // Fungsi untuk memanggil API
+  const handleExecute = async () => {
+    setIsLoading(true);
+    setApiResponse(null);
+    setCurlCommand('');
+
+    try {
+      const response = await fetch(`/api/textoins?prompt=${encodeURIComponent(inputPrompt)}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setApiResponse(data);
+        // Generate cURL command
+        setCurlCommand(
+          `curl -X GET "http://localhost:3000/api/textoins?prompt=${encodeURIComponent(inputPrompt)}"`
+        );
+      } else {
+        setApiResponse({ error: data.error || 'Failed to fetch data' });
+      }
+    } catch (error) {
+      setApiResponse({ error: 'An error occurred while fetching data' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <ChakraProvider>
@@ -84,6 +121,7 @@ export default function Home() {
                       cursor="pointer"
                       _hover={{ bg: 'rgba(255,255,255,0.1)' }}
                       borderRadius="md"
+                      onClick={() => handleEndpointClick(endpoint.path)} // Tambahkan ini
                     >
                       <span className={`api-method ${endpoint.method.toLowerCase()}`}>
                         {endpoint.method}
@@ -132,8 +170,45 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <Box className="card" p={8} minH="400px">
-                <Flex justify="center" align="center" h="100%">
-                  <Text color="gray.400">Select an endpoint to explore</Text>
+                <Flex direction="column" gap={4}>
+                  {/* Input Prompt */}
+                  <Input
+                    placeholder="Enter a prompt (e.g., A young man wearing a cool black hoodie in a cyberpunk style)"
+                    value={inputPrompt}
+                    onChange={(e) => setInputPrompt(e.target.value)}
+                  />
+
+                  {/* Execute Button */}
+                  <Button
+                    onClick={handleExecute}
+                    colorScheme="blue"
+                    isLoading={isLoading}
+                    loadingText="Executing..."
+                  >
+                    Execute
+                  </Button>
+
+                  {/* cURL Command */}
+                  {curlCommand && (
+                    <Box bg="gray.100" p={4} borderRadius="md">
+                      <Text fontSize="sm" fontWeight="bold" mb={2}>
+                        cURL Command:
+                      </Text>
+                      <Text fontSize="sm" fontFamily="monospace" whiteSpace="pre-wrap">
+                        {curlCommand}
+                      </Text>
+                    </Box>
+                  )}
+
+                  {/* API Response */}
+                  {apiResponse && (
+                    <Box bg="gray.100" p={4} borderRadius="md">
+                      <Text fontSize="sm" fontWeight="bold" mb={2}>
+                        API Response:
+                      </Text>
+                      <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
+                    </Box>
+                  )}
                 </Flex>
               </Box>
             </motion.div>
