@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid } from '@chakra-ui/react';
-import { FiSearch, FiEye, FiClock, FiBox, FiActivity } from 'react-icons/fi';
+import { FiSearch, FiEye, FiClock, FiBox, FiActivity, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const endpoints = [
   { method: 'GET', name: 'Stats', category: 'Analytics', path: '/api/stats' },
@@ -20,6 +20,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState(initialStats);
   const [apiResponse, setApiResponse] = useState<any>(null);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const [isApiDocVisible, setIsApiDocVisible] = useState(false);
 
   // Fungsi untuk memperbarui statistik
   useEffect(() => {
@@ -53,64 +55,20 @@ export default function Home() {
       });
   };
 
+  // Fungsi untuk toggle sidebar
+  const toggleSidebar = () => {
+    setIsSidebarVisible(!isSidebarVisible);
+  };
+
+  // Fungsi untuk toggle API Documentation
+  const toggleApiDoc = () => {
+    setIsApiDocVisible(!isApiDocVisible);
+  };
+
   return (
     <ChakraProvider>
       <Container maxW="container.xl" p={0}>
         <Flex>
-          {/* Sidebar */}
-          <Box className="sidebar" w="250px" h="100vh" p={4}>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Text fontSize="2xl" fontWeight="bold" mb={6}>
-                API Documentation
-              </Text>
-              <Box position="relative" mb={6}>
-                <Input
-                  placeholder="Search endpoints..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="search-input"
-                  pl={10}
-                />
-                <Icon
-                  as={FiSearch}
-                  position="absolute"
-                  left={3}
-                  top={3}
-                  color="gray.400"
-                />
-              </Box>
-              <Box>
-                {endpoints.map((endpoint, index) => (
-                  <motion.div
-                    key={endpoint.name}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                  >
-                    <Flex
-                      align="center"
-                      p={2}
-                      mb={2}
-                      cursor="pointer"
-                      _hover={{ bg: 'rgba(255,255,255,0.1)' }}
-                      borderRadius="md"
-                      onClick={() => handleEndpointClick(endpoint.path)} // Tambahkan ini
-                    >
-                      <span className={`api-method ${endpoint.method.toLowerCase()}`}>
-                        {endpoint.method}
-                      </span>
-                      <Text ml={3}>{endpoint.name}</Text>
-                    </Flex>
-                  </motion.div>
-                ))}
-              </Box>
-            </motion.div>
-          </Box>
-
           {/* Main Content */}
           <Box flex={1} p={8}>
             <Grid templateColumns="repeat(2, 1fr)" gap={6} mb={8}>
@@ -158,6 +116,72 @@ export default function Home() {
             </motion.div>
           </Box>
         </Flex>
+
+        {/* Sidebar dari Bawah */}
+        <motion.div
+          initial={{ y: '100%' }}
+          animate={{ y: isSidebarVisible ? 0 : '100%' }}
+          transition={{ duration: 0.5 }}
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '50vh', // Sesuaikan tinggi sidebar
+            backgroundColor: 'white',
+            zIndex: 1000,
+            boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <Box p={4}>
+            <Text fontSize="xl" fontWeight="bold" mb={4}>
+              Sidebar Content
+            </Text>
+            {/* Tambahkan konten sidebar di sini */}
+          </Box>
+          <Icon
+            as={isSidebarVisible ? FiChevronDown : FiChevronUp}
+            position="absolute"
+            top={-8}
+            left="50%"
+            transform="translateX(-50%)"
+            cursor="pointer"
+            onClick={toggleSidebar}
+          />
+        </motion.div>
+
+        {/* API Documentation dari Samping */}
+        <motion.div
+          initial={{ x: '-100%' }}
+          animate={{ x: isApiDocVisible ? 0 : '-100%' }}
+          transition={{ duration: 0.5 }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: '300px', // Sesuaikan lebar sidebar
+            backgroundColor: 'white',
+            zIndex: 1000,
+            boxShadow: '4px 0px 10px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <Box p={4}>
+            <Text fontSize="xl" fontWeight="bold" mb={4}>
+              API Documentation
+            </Text>
+            {/* Tambahkan konten API Documentation di sini */}
+          </Box>
+          <Icon
+            as={isApiDocVisible ? FiChevronLeft : FiChevronRight}
+            position="absolute"
+            top="50%"
+            right={-8}
+            transform="translateY(-50%)"
+            cursor="pointer"
+            onClick={toggleApiDoc}
+          />
+        </motion.div>
       </Container>
     </ChakraProvider>
   );
