@@ -1,26 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid } from '@chakra-ui/react';
 import { FiSearch, FiEye, FiClock, FiBox, FiActivity } from 'react-icons/fi';
 
 const endpoints = [
-  { method: 'GET', name: 'Animagine', category: 'AI' },
-  { method: 'GET', name: 'Anipix', category: 'AI' },
-  { method: 'GET', name: 'Artify', category: 'AI' },
-  { method: 'POST', name: 'Chat GPT', category: 'AI' },
-  { method: 'GET', name: 'Claude', category: 'AI' },
-  { method: 'GET', name: 'Copilot', category: 'AI' },
+  { method: 'GET', name: 'Stats', category: 'Analytics', path: '/api/stats' },
+  { method: 'GET', name: 'Textoins', category: 'Utilities', path: '/api/textoins' },
+  { method: 'GET', name: 'FFStalk', category: 'Gaming', path: '/api/ffstalk' },
 ];
 
-const stats = [
-  { label: 'Total Requests', value: '1,142,891', icon: FiActivity, color: 'blue.400' },
-  { label: 'Total Visitors', value: '5,173', icon: FiEye, color: 'green.400' },
-  { label: 'Total Endpoints', value: '170', icon: FiBox, color: 'yellow.400' },
+const initialStats = [
+  { label: 'Total Requests', value: 1142891, icon: FiActivity, color: 'blue.400' },
+  { label: 'Total Visitors', value: 5173, icon: FiEye, color: 'green.400' },
+  { label: 'Total Endpoints', value: 3, icon: FiBox, color: 'yellow.400' }, // Diperbarui ke 3
   { label: 'Runtime', value: '14 day, 7 hour', icon: FiClock, color: 'purple.400' },
 ];
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [stats, setStats] = useState(initialStats);
+
+  // Fungsi untuk memperbarui statistik
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStats((prevStats) =>
+        prevStats.map((stat) => {
+          if (stat.label === 'Total Requests') {
+            return { ...stat, value: stat.value + Math.floor(Math.random() * 100) };
+          }
+          if (stat.label === 'Total Visitors') {
+            return { ...stat, value: stat.value + Math.floor(Math.random() * 10) };
+          }
+          return stat;
+        })
+      );
+    }, 2000); // Update setiap 2 detik
+
+    return () => clearInterval(interval); // Membersihkan interval saat komponen di-unmount
+  }, []);
 
   return (
     <ChakraProvider>
@@ -96,7 +113,9 @@ export default function Home() {
                           {stat.label}
                         </Text>
                         <Text fontSize="2xl" fontWeight="bold">
-                          {stat.value}
+                          {typeof stat.value === 'number'
+                            ? stat.value.toLocaleString() // Format angka dengan separator
+                            : stat.value}
                         </Text>
                       </Box>
                       <Icon as={stat.icon} boxSize={6} color={stat.color} />
