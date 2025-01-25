@@ -41,22 +41,16 @@ export default function Home() {
   }, []);
 
   // Fungsi untuk menangani klik pada endpoint
-  const handleEndpointClick = async (path: string) => {
-    const prompt = "A young man wearing a cool black hoodie in a cyberpunk style"; // Prompt default
-    const url = `${path}?prompt=${encodeURIComponent(prompt)}`; // Buat URL dengan prompt
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log('API Response:', data);
-      setApiResponse(data); // Simpan data API ke state
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setApiResponse({ error: 'Failed to fetch data' }); // Tampilkan pesan error
-    }
+  const handleEndpointClick = (path: string) => {
+    fetch(path)
+      .then((response) => response.json())
+      .then((data) => {
+        setApiResponse(data); // Simpan data API ke state
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+        setApiResponse({ error: 'Failed to fetch data' }); // Tampilkan pesan error
+      });
   };
 
   return (
@@ -155,15 +149,7 @@ export default function Home() {
               <Box className="card" p={8} minH="400px">
                 <Flex justify="center" align="center" h="100%">
                   {apiResponse ? (
-                    apiResponse.error ? (
-                      <Text color="red.500">{apiResponse.error}</Text> // Tampilkan pesan error
-                    ) : (
-                      <img
-                        src={apiResponse.url} // Tampilkan gambar dari URL
-                        alt="Generated"
-                        style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px' }}
-                      />
-                    )
+                    <pre>{JSON.stringify(apiResponse, null, 2)}</pre> // Tampilkan data API
                   ) : (
                     <Text color="gray.400">Select an endpoint to explore</Text>
                   )}
