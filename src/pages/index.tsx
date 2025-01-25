@@ -12,7 +12,7 @@ const endpoints = [
 const initialStats = [
   { label: 'Total Requests', value: 1142891, icon: FiActivity, color: 'blue.400' },
   { label: 'Total Visitors', value: 5173, icon: FiEye, color: 'green.400' },
-  { label: 'Total Endpoints', value: 3, icon: FiBox, color: 'yellow.400' }, // Diperbarui ke 3
+  { label: 'Total Endpoints', value: 3, icon: FiBox, color: 'yellow.400' },
   { label: 'Runtime', value: '14 day, 7 hour', icon: FiClock, color: 'purple.400' },
 ];
 
@@ -25,10 +25,10 @@ export default function Home() {
     const interval = setInterval(() => {
       setStats((prevStats) =>
         prevStats.map((stat) => {
-          if (stat.label === 'Total Requests') {
+          if (stat.label === 'Total Requests' && typeof stat.value === 'number') {
             return { ...stat, value: stat.value + Math.floor(Math.random() * 100) };
           }
-          if (stat.label === 'Total Visitors') {
+          if (stat.label === 'Total Visitors' && typeof stat.value === 'number') {
             return { ...stat, value: stat.value + Math.floor(Math.random() * 10) };
           }
           return stat;
