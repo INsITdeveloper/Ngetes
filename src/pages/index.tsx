@@ -41,7 +41,6 @@ const swaggerConfig = {
                 schema: {
                   type: 'object',
                   properties: {
-                    // Define your response schema here
                     status: {
                       type: 'string',
                     },
@@ -90,7 +89,7 @@ export default function Home() {
             as={motion.div}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.5 }} // Update this line
           >
             <SwaggerUI spec={swaggerConfig} />
           </Box>
@@ -98,4 +97,4 @@ export default function Home() {
       </Container>
     </ChakraProvider>
   );
-        }
+}
