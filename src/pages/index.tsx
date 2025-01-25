@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid, Button } from '@chakra-ui/react';
-import { FiSearch, FiEye, FiClock, FiBox, FiActivity, FiChevronUp, FiChevronDown } from 'react-icons/fi';
+import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid } from '@chakra-ui/react';
+import { FiSearch, FiEye, FiClock, FiBox, FiActivity, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 
 const endpoints = [
   { method: 'GET', name: 'Stats', category: 'Analytics', path: '/api/stats' },
@@ -19,8 +19,8 @@ const initialStats = [
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState(initialStats);
+  const [isApiDocVisible, setIsApiDocVisible] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [inputValue, setInputValue] = useState('');
   const [apiResult, setApiResult] = useState<any>(null);
 
   // Fungsi untuk memperbarui statistik
@@ -43,28 +43,30 @@ export default function Home() {
   }, []);
 
   // Fungsi untuk menangani klik pada endpoint
-  const handleEndpointClick = (path: string) => {
-    setIsSidebarVisible(true); // Munculkan sidebar
-  };
-
-  // Fungsi untuk toggle sidebar
-  const toggleSidebar = () => {
-    setIsSidebarVisible(!isSidebarVisible);
-  };
-
-  // Fungsi untuk handle submit form
-  const handleSubmit = async () => {
+  const handleEndpointClick = async (path: string) => {
     try {
-      const response = await fetch(`/api/textoins?prompt=${encodeURIComponent(inputValue)}`);
+      const response = await fetch(path);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
       setApiResult(data); // Simpan hasil API
+      setIsSidebarVisible(true); // Munculkan sidebar bawah
     } catch (error) {
       console.error('Error fetching data:', error);
       setApiResult({ error: 'Failed to fetch data' }); // Tampilkan pesan error
+      setIsSidebarVisible(true); // Munculkan sidebar bawah meskipun error
     }
+  };
+
+  // Fungsi untuk toggle API Documentation
+  const toggleApiDoc = () => {
+    setIsApiDocVisible(!isApiDocVisible);
+  };
+
+  // Fungsi untuk toggle sidebar bawah
+  const toggleSidebar = () => {
+    setIsSidebarVisible(!isSidebarVisible);
   };
 
   return (
@@ -115,6 +117,55 @@ export default function Home() {
           </Box>
         </Flex>
 
+        {/* API Documentation dari Samping */}
+        <motion.div
+          initial={{ x: '-100%' }}
+          animate={{ x: isApiDocVisible ? 0 : '-100%' }}
+          transition={{ duration: 0.5 }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: '300px', // Sesuaikan lebar sidebar
+            backgroundColor: 'white',
+            zIndex: 1000,
+            boxShadow: '4px 0px 10px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <Box p={4}>
+            <Text fontSize="xl" fontWeight="bold" mb={4}>
+              API Documentation
+            </Text>
+            {endpoints.map((endpoint, index) => (
+              <Flex
+                key={endpoint.name}
+                align="center"
+                p={2}
+                mb={2}
+                cursor="pointer"
+                _hover={{ bg: 'rgba(0, 0, 0, 0.05)' }}
+                borderRadius="md"
+                onClick={() => handleEndpointClick(endpoint.path)} // Panggil fungsi saat diklik
+              >
+                <span className={`api-method ${endpoint.method.toLowerCase()}`}>
+                  {endpoint.method}
+                </span>
+                <Text ml={3}>{endpoint.name}</Text>
+              </Flex>
+            ))}
+          </Box>
+          <Icon
+            as={isApiDocVisible ? FiChevronLeft : FiChevronRight}
+            position="absolute"
+            top="50%"
+            right={-8}
+            transform="translateY(-50%)"
+            cursor="pointer"
+            onClick={toggleApiDoc}
+          />
+        </motion.div>
+
         {/* Sidebar Bawah */}
         <motion.div
           initial={{ y: '100%' }}
@@ -133,24 +184,12 @@ export default function Home() {
         >
           <Box p={4}>
             <Text fontSize="xl" fontWeight="bold" mb={4}>
-              Generate Image
+              API Result
             </Text>
-            <Input
-              placeholder="Enter a prompt"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              mb={4}
-            />
-            <Button onClick={handleSubmit} colorScheme="blue">
-              Generate
-            </Button>
-            {apiResult && (
-              <Box mt={4}>
-                <Text fontSize="lg" fontWeight="bold">
-                  Result:
-                </Text>
-                <pre>{JSON.stringify(apiResult, null, 2)}</pre>
-              </Box>
+            {apiResult ? (
+              <pre>{JSON.stringify(apiResult, null, 2)}</pre> // Tampilkan hasil API
+            ) : (
+              <Text color="gray.400">No data available</Text>
             )}
           </Box>
           <Icon
