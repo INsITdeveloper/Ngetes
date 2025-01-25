@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid } from '@chakra-ui/react';
-import { FiSearch, FiEye, FiClock, FiBox, FiActivity, FiChevronUp, FiChevronDown, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid, Button } from '@chakra-ui/react';
+import { FiSearch, FiEye, FiClock, FiBox, FiActivity, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 
 const endpoints = [
   { method: 'GET', name: 'Stats', category: 'Analytics', path: '/api/stats' },
@@ -19,9 +19,9 @@ const initialStats = [
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState(initialStats);
-  const [apiResponse, setApiResponse] = useState<any>(null);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
-  const [isApiDocVisible, setIsApiDocVisible] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [apiResult, setApiResult] = useState<any>(null);
 
   // Fungsi untuk memperbarui statistik
   useEffect(() => {
@@ -44,15 +44,7 @@ export default function Home() {
 
   // Fungsi untuk menangani klik pada endpoint
   const handleEndpointClick = (path: string) => {
-    fetch(path)
-      .then((response) => response.json())
-      .then((data) => {
-        setApiResponse(data); // Simpan data API ke state
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-        setApiResponse({ error: 'Failed to fetch data' }); // Tampilkan pesan error
-      });
+    setIsSidebarVisible(true); // Munculkan sidebar
   };
 
   // Fungsi untuk toggle sidebar
@@ -60,9 +52,19 @@ export default function Home() {
     setIsSidebarVisible(!isSidebarVisible);
   };
 
-  // Fungsi untuk toggle API Documentation
-  const toggleApiDoc = () => {
-    setIsApiDocVisible(!isApiDocVisible);
+  // Fungsi untuk handle submit form
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch(`/api/textoins?prompt=${encodeURIComponent(inputValue)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setApiResult(data); // Simpan hasil API
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setApiResult({ error: 'Failed to fetch data' }); // Tampilkan pesan error
+    }
   };
 
   return (
@@ -106,18 +108,14 @@ export default function Home() {
             >
               <Box className="card" p={8} minH="400px">
                 <Flex justify="center" align="center" h="100%">
-                  {apiResponse ? (
-                    <pre>{JSON.stringify(apiResponse, null, 2)}</pre> // Tampilkan data API
-                  ) : (
-                    <Text color="gray.400">Select an endpoint to explore</Text>
-                  )}
+                  <Text color="gray.400">Select an endpoint to explore</Text>
                 </Flex>
               </Box>
             </motion.div>
           </Box>
         </Flex>
 
-        {/* Sidebar dari Bawah */}
+        {/* Sidebar Bawah */}
         <motion.div
           initial={{ y: '100%' }}
           animate={{ y: isSidebarVisible ? 0 : '100%' }}
@@ -135,9 +133,25 @@ export default function Home() {
         >
           <Box p={4}>
             <Text fontSize="xl" fontWeight="bold" mb={4}>
-              Sidebar Content
+              Generate Image
             </Text>
-            {/* Tambahkan konten sidebar di sini */}
+            <Input
+              placeholder="Enter a prompt"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              mb={4}
+            />
+            <Button onClick={handleSubmit} colorScheme="blue">
+              Generate
+            </Button>
+            {apiResult && (
+              <Box mt={4}>
+                <Text fontSize="lg" fontWeight="bold">
+                  Result:
+                </Text>
+                <pre>{JSON.stringify(apiResult, null, 2)}</pre>
+              </Box>
+            )}
           </Box>
           <Icon
             as={isSidebarVisible ? FiChevronDown : FiChevronUp}
@@ -147,39 +161,6 @@ export default function Home() {
             transform="translateX(-50%)"
             cursor="pointer"
             onClick={toggleSidebar}
-          />
-        </motion.div>
-
-        {/* API Documentation dari Samping */}
-        <motion.div
-          initial={{ x: '-100%' }}
-          animate={{ x: isApiDocVisible ? 0 : '-100%' }}
-          transition={{ duration: 0.5 }}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            width: '300px', // Sesuaikan lebar sidebar
-            backgroundColor: 'white',
-            zIndex: 1000,
-            boxShadow: '4px 0px 10px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          <Box p={4}>
-            <Text fontSize="xl" fontWeight="bold" mb={4}>
-              API Documentation
-            </Text>
-            {/* Tambahkan konten API Documentation di sini */}
-          </Box>
-          <Icon
-            as={isApiDocVisible ? FiChevronLeft : FiChevronRight}
-            position="absolute"
-            top="50%"
-            right={-8}
-            transform="translateY(-50%)"
-            cursor="pointer"
-            onClick={toggleApiDoc}
           />
         </motion.div>
       </Container>
