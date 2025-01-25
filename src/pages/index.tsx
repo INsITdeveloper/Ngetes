@@ -4,9 +4,9 @@ import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid } from '@
 import { FiSearch, FiEye, FiClock, FiBox, FiActivity } from 'react-icons/fi';
 
 const endpoints = [
-  { method: 'GET', name: 'Stats', category: 'Analytics', path: '/api/stats' },
-  { method: 'GET', name: 'Textoins', category: 'Utilities', path: '/api/textoins' },
-  { method: 'GET', name: 'FFStalk', category: 'Gaming', path: '/api/ffstalk' },
+  { method: 'GET', name: 'Stats', category: 'Analytics', path: 'https://apins.vercel.app/api/stats' },
+  { method: 'GET', name: 'Textoins', category: 'Utilities', path: 'https://apins.vercel.app/api/textoins' },
+  { method: 'GET', name: 'FFStalk', category: 'Gaming', path: 'https://apins.vercel.app/api/ffstalk' },
 ];
 
 const initialStats = [
