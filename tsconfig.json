@@ -17,7 +17,7 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "types": ["@chakra-ui/react", "next", "react", "react-dom", "framer-motion"]
+    "types": ["@chakra-ui/react", "next", "react", "react-dom"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
