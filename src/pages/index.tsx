@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid, Button } from '@chakra-ui/react';
+import { ChakraProvider, Container, Box, Text, Input, Icon, Flex, Grid } from '@chakra-ui/react';
 import { FiSearch, FiEye, FiClock, FiBox, FiActivity } from 'react-icons/fi';
 
 const endpoints = [
@@ -19,11 +19,9 @@ const initialStats = [
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stats, setStats] = useState(initialStats);
-  const [isLoading, setIsLoading] = useState(false);
-  const [inputPrompt, setInputPrompt] = useState('');
   const [apiResponse, setApiResponse] = useState<any>(null);
-  const [curlCommand, setCurlCommand] = useState('');
 
+  // Fungsi untuk memperbarui statistik
   useEffect(() => {
     const interval = setInterval(() => {
       setStats((prevStats) =>
@@ -34,52 +32,32 @@ export default function Home() {
           if (stat.label === 'Total Visitors' && typeof stat.value === 'number') {
             return { ...stat, value: stat.value + Math.floor(Math.random() * 10) };
           }
-          return stat;
+          return stat; // Kembalikan stat tanpa perubahan jika tidak memenuhi kondisi
         })
       );
-    }, 2000);
+    }, 2000); // Update setiap 2 detik
 
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); // Membersihkan interval saat komponen di-unmount
   }, []);
 
+  // Fungsi untuk menangani klik pada endpoint
   const handleEndpointClick = (path: string) => {
-    setInputPrompt('');
-    setApiResponse(null);
-    setCurlCommand('');
-  };
-
-  const handleExecute = async () => {
-    setIsLoading(true);
-    setApiResponse(null);
-    setCurlCommand('');
-
-    // Gunakan VERCEL_URL jika tersedia, jika tidak, gunakan localhost
-    const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-
-    try {
-      const response = await fetch(`${vercelUrl}/api/textoins?prompt=${encodeURIComponent(inputPrompt)}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        setApiResponse(data);
-        // Generate cURL command dengan URL yang sesuai
-        setCurlCommand(
-          `curl -X GET "${vercelUrl}/api/textoins?prompt=${encodeURIComponent(inputPrompt)}"`
-        );
-      } else {
-        setApiResponse({ error: data.error || 'Failed to fetch data' });
-      }
-    } catch (error) {
-      setApiResponse({ error: 'An error occurred while fetching data' });
-    } finally {
-      setIsLoading(false);
-    }
+    fetch(path)
+      .then((response) => response.json())
+      .then((data) => {
+        setApiResponse(data); // Simpan data API ke state
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+        setApiResponse({ error: 'Failed to fetch data' }); // Tampilkan pesan error
+      });
   };
 
   return (
     <ChakraProvider>
       <Container maxW="container.xl" p={0}>
         <Flex>
+          {/* Sidebar */}
           <Box className="sidebar" w="250px" h="100vh" p={4}>
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -120,7 +98,7 @@ export default function Home() {
                       cursor="pointer"
                       _hover={{ bg: 'rgba(255,255,255,0.1)' }}
                       borderRadius="md"
-                      onClick={() => handleEndpointClick(endpoint.path)}
+                      onClick={() => handleEndpointClick(endpoint.path)} // Tambahkan ini
                     >
                       <span className={`api-method ${endpoint.method.toLowerCase()}`}>
                         {endpoint.method}
@@ -133,6 +111,7 @@ export default function Home() {
             </motion.div>
           </Box>
 
+          {/* Main Content */}
           <Box flex={1} p={8}>
             <Grid templateColumns="repeat(2, 1fr)" gap={6} mb={8}>
               {stats.map((stat, index) => (
@@ -150,7 +129,7 @@ export default function Home() {
                         </Text>
                         <Text fontSize="2xl" fontWeight="bold">
                           {typeof stat.value === 'number'
-                            ? stat.value.toLocaleString()
+                            ? stat.value.toLocaleString() // Format angka dengan separator
                             : stat.value}
                         </Text>
                       </Box>
@@ -161,46 +140,18 @@ export default function Home() {
               ))}
             </Grid>
 
+            {/* API Documentation Area */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <Box className="card" p={8} minH="400px">
-                <Flex direction="column" gap={4}>
-                  <Input
-                    placeholder="Enter a prompt (e.g., A young man wearing a cool black hoodie in a cyberpunk style)"
-                    value={inputPrompt}
-                    onChange={(e) => setInputPrompt(e.target.value)}
-                  />
-
-                  <Button
-                    onClick={handleExecute}
-                    colorScheme="blue"
-                    isLoading={isLoading}
-                    loadingText="Executing..."
-                  >
-                    Execute
-                  </Button>
-
-                  {curlCommand && (
-                    <Box bg="gray.100" p={4} borderRadius="md">
-                      <Text fontSize="sm" fontWeight="bold" mb={2}>
-                        cURL Command:
-                      </Text>
-                      <Text fontSize="sm" fontFamily="monospace" whiteSpace="pre-wrap">
-                        {curlCommand}
-                      </Text>
-                    </Box>
-                  )}
-
-                  {apiResponse && (
-                    <Box bg="gray.100" p={4} borderRadius="md">
-                      <Text fontSize="sm" fontWeight="bold" mb={2}>
-                        API Response:
-                      </Text>
-                      <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
-                    </Box>
+                <Flex justify="center" align="center" h="100%">
+                  {apiResponse ? (
+                    <pre>{JSON.stringify(apiResponse, null, 2)}</pre> // Tampilkan data API
+                  ) : (
+                    <Text color="gray.400">Select an endpoint to explore</Text>
                   )}
                 </Flex>
               </Box>
